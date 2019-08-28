@@ -3,4 +3,10 @@
     <string name="image_of_recipe">Image of Recipe</string>
     <string name="n_ingredients">%d Ingredients</string>
     <string name="n_servings">%d Servings</string>
+    <string name="step_n">Step %d</string>
+    <string name="steps">Steps</string>
+    <string name="ingredients">Ingredients</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

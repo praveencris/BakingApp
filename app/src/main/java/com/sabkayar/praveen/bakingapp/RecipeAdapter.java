@@ -9,21 +9,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sabkayar.praveen.bakingapp.databinding.RecipeMainItemLayoutBinding;
+import com.sabkayar.praveen.bakingapp.model.Recipe;
 
 import java.util.List;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeViewHolder> {
 
-    private List<Utils.Recipe> mRecipeList;
+    private List<Recipe> mRecipeList;
 
     private Context mContext;
     private OnItemClickListener mOnItemClickListener;
 
     public interface OnItemClickListener {
-        void onItemClick(Utils.Recipe recipe);
+        void onItemClick(Recipe recipe);
     }
 
-    public RecipeAdapter(List<Utils.Recipe> recipeList, OnItemClickListener listener, Context context) {
+    public RecipeAdapter(List<Recipe> recipeList, OnItemClickListener listener, Context context) {
         mRecipeList = recipeList;
         mOnItemClickListener = listener;
         mContext = context;
@@ -39,7 +40,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
 
     @Override
     public void onBindViewHolder(@NonNull RecipeViewHolder holder, int position) {
-        Utils.Recipe recipe = mRecipeList.get(position);
+        Recipe recipe = mRecipeList.get(position);
         holder.bind(recipe, mOnItemClickListener);
     }
 
@@ -59,7 +60,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
             mBinding = binding;
         }
 
-        public void bind(final Utils.Recipe recipe, final OnItemClickListener listener) {
+        public void bind(final Recipe recipe, final OnItemClickListener listener) {
             mBinding.tvRecipeName.setText(recipe.getName());
             mBinding.tvIngredients.setText(mContext.getString(R.string.n_ingredients, recipe.getIngredients().size()));
             mBinding.tvServings.setText(mContext.getString(R.string.n_servings, recipe.getServings()));
