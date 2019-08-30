@@ -1,12 +1,14 @@
-package com.sabkayar.praveen.bakingapp;
+package com.sabkayar.praveen.bakingapp.ui.fragments;
 
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -33,7 +35,12 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.model.Step;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -51,8 +58,8 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private Step mStep;
-    private String mParam2;
+    private List<Step> mSteps;
+    private int mPosition;
 
     private OnFragmentInteractionListener mListener;
 
@@ -69,11 +76,11 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
      * @return A new instance of fragment RecipeStepDetailFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static RecipeStepDetailFragment newInstance(Step param1, String param2) {
+    public static RecipeStepDetailFragment newInstance(List<Step> param1, int param2) {
         RecipeStepDetailFragment fragment = new RecipeStepDetailFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putParcelableArrayList(ARG_PARAM1, (ArrayList<? extends Parcelable>) param1);
+        args.putInt(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,13 +89,15 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mStep = getArguments().getParcelable(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mSteps = getArguments().getParcelableArrayList(ARG_PARAM1);
+            mPosition = getArguments().getInt(ARG_PARAM2);
         }
     }
 
     private ProgressBar mProgressBar;
     private SimpleExoPlayerView mExoPlayerView;
+    private TextView mStepDetailTextView;
+    private boolean isLandscape;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -97,6 +106,15 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
         View rootView = inflater.inflate(R.layout.fragment_recipe_step_detail, container, false);
         mProgressBar = rootView.findViewById(R.id.progressBar);
         mExoPlayerView = rootView.findViewById(R.id.simpleExoPlayerView);
+        mStepDetailTextView = rootView.findViewById(R.id.tv_step_detail);
+        isLandscape = mStepDetailTextView == null;
+
+        if (!isLandscape) {
+            mStepDetailTextView.setText(mSteps.get(mPosition).getDescription());
+            Objects.requireNonNull(getActivity()).setTitle(mPosition + " : " + mSteps.get(mPosition).getShortDescription());
+        } else {
+            Objects.requireNonNull(getActivity()).setTitle("Step " + mPosition + " : " + mSteps.get(mPosition).getShortDescription());
+        }
         return rootView;
     }
 
@@ -237,7 +255,7 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     private void prepareExoplayer() {
         // Prepare the MediaSource.
         String userAgent = Util.getUserAgent(getActivity(), "BakingApp");
-        Uri progressiveUri = Uri.parse(mStep.getVideoURL());
+        Uri progressiveUri = Uri.parse(mSteps.get(mPosition).getVideoURL());
 
         //For dash format
       /*  // Create a data source factory.

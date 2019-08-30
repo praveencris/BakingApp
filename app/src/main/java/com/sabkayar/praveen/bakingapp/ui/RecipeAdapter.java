@@ -1,4 +1,4 @@
-package com.sabkayar.praveen.bakingapp;
+package com.sabkayar.praveen.bakingapp.ui;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.databinding.RecipeMainItemLayoutBinding;
 import com.sabkayar.praveen.bakingapp.model.Recipe;
 

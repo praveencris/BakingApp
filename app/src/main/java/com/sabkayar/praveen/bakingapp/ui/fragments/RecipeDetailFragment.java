@@ -1,18 +1,17 @@
-package com.sabkayar.praveen.bakingapp;
+package com.sabkayar.praveen.bakingapp.ui.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.databinding.FragmentRecipeDetailBinding;
 import com.sabkayar.praveen.bakingapp.model.Ingredient;
 import com.sabkayar.praveen.bakingapp.model.Recipe;
@@ -77,7 +76,7 @@ public class RecipeDetailFragment extends Fragment implements RecipeDetailAdapte
         View itemView = mBinding.getRoot();
         List<Ingredient> ingredientList = mRecipe.getIngredients();
         for (int i = 0; i < ingredientList.size(); i++) {
-            mBinding.tvIngredients.append(i + 1 + " : " + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + " " + ingredientList.get(i).getIngredient() + "\n");
+            mBinding.tvIngredients.append(i+ " : " + ingredientList.get(i).getQuantity() + " " + ingredientList.get(i).getMeasure() + " " + ingredientList.get(i).getIngredient() + "\n");
         }
         RecyclerView recyclerView = mBinding.rvRecipeDetail;
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
@@ -86,13 +85,14 @@ public class RecipeDetailFragment extends Fragment implements RecipeDetailAdapte
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(recipeDetailAdapter);
 
+
         return itemView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Step step) {
+    public void onButtonPressed(List<Step> steps,int position) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(step);
+            mListener.onFragmentInteraction(steps,position);
         }
     }
 
@@ -114,8 +114,8 @@ public class RecipeDetailFragment extends Fragment implements RecipeDetailAdapte
     }
 
     @Override
-    public void onItemClick(Step step) {
-        onButtonPressed(step);
+    public void onItemClick(List<Step> steps,int position) {
+        onButtonPressed(steps,position);
     }
 
     /**
@@ -130,6 +130,6 @@ public class RecipeDetailFragment extends Fragment implements RecipeDetailAdapte
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Step step);
+        void onFragmentInteraction(List<Step> steps,int position);
     }
 }

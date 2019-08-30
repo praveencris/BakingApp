@@ -1,4 +1,4 @@
-package com.sabkayar.praveen.bakingapp;
+package com.sabkayar.praveen.bakingapp.ui.fragments;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.databinding.RecipeDetailItemLayoutBinding;
 import com.sabkayar.praveen.bakingapp.model.Step;
 
@@ -27,7 +28,7 @@ public class RecipeDetailAdapter extends RecyclerView.Adapter<RecipeDetailAdapte
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Step step);
+        void onItemClick(List<Step> steps,int position);
 
     }
 
@@ -63,12 +64,12 @@ public class RecipeDetailAdapter extends RecyclerView.Adapter<RecipeDetailAdapte
         }
 
         public void bind(final Step step, final OnItemClickListener listener) {
-            mBinding.tvStepCount.setText(mContext.getString(R.string.step_n, step.getId()+1));
+            mBinding.tvStepCount.setText(mContext.getString(R.string.step_n, step.getId()));
             mBinding.tvShortDescription.setText(step.getShortDescription());
             mBinding.layoutRecipeDetail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    listener.onItemClick(step);
+                    listener.onItemClick(mStepList,getAdapterPosition());
                 }
             });
         }
