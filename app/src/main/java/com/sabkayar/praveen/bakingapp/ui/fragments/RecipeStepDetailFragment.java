@@ -4,12 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -37,10 +41,14 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.model.Step;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 /**
@@ -56,12 +64,24 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String PLAY_BACK_POSITION = "play_back_position";
+    private static final String LOG_TAG = RecipeStepDetailFragment.class.getSimpleName();
+    ;
 
     // TODO: Rename and change types of parameters
     private List<Step> mSteps;
     private int mPosition;
 
     private OnFragmentInteractionListener mListener;
+    @BindView(R.id.progressBar)
+    ProgressBar mProgressBar;
+    @BindView(R.id.simpleExoPlayerView)
+    SimpleExoPlayerView mExoPlayerView;
+    @BindView(R.id.tv_step_detail)
+    TextView mStepDetailTextView;
+    @BindView(R.id.imv_recipe)
+    ImageView mRecipeImageView;
+
 
     public RecipeStepDetailFragment() {
         // Required empty public constructor
@@ -92,22 +112,19 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
             mSteps = getArguments().getParcelableArrayList(ARG_PARAM1);
             mPosition = getArguments().getInt(ARG_PARAM2);
         }
+        if (savedInstanceState != null) {
+            playbackPosition = savedInstanceState.getLong(PLAY_BACK_POSITION);
+        }
     }
-
-    private ProgressBar mProgressBar;
-    private SimpleExoPlayerView mExoPlayerView;
-    private TextView mStepDetailTextView;
-    private boolean isLandscape;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recipe_step_detail, container, false);
-        mProgressBar = rootView.findViewById(R.id.progressBar);
-        mExoPlayerView = rootView.findViewById(R.id.simpleExoPlayerView);
-        mStepDetailTextView = rootView.findViewById(R.id.tv_step_detail);
-        isLandscape = mStepDetailTextView == null;
+        ButterKnife.bind(this, rootView);
+
+        boolean isLandscape = mStepDetailTextView == null;
 
         if (!isLandscape) {
             mStepDetailTextView.setText(mSteps.get(mPosition).getDescription());
@@ -115,6 +132,22 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
         } else {
             Objects.requireNonNull(getActivity()).setTitle("Step " + mPosition + " : " + mSteps.get(mPosition).getShortDescription());
         }
+
+
+        String imageUrl = mSteps.get(mPosition).getThumbnailURL();
+        String videoUrl = mSteps.get(mPosition).getVideoURL();
+        if (TextUtils.isEmpty(videoUrl) && TextUtils.isEmpty(imageUrl)) {
+            mRecipeImageView.setVisibility(View.VISIBLE);
+            mExoPlayerView.setVisibility(View.INVISIBLE);
+            mExoPlayerView.setDefaultArtwork(getResources().getDrawable(R.drawable.error_placeholder));
+        } else if (TextUtils.isEmpty(videoUrl) && !TextUtils.isEmpty(imageUrl)) {
+            mRecipeImageView.setVisibility(View.VISIBLE);
+            mExoPlayerView.setVisibility(View.INVISIBLE);
+            Picasso.get().load(imageUrl).placeholder(R.drawable.progress_animation)
+                    .error(R.drawable.error_placeholder).into(mRecipeImageView);
+        }
+
+
         return rootView;
     }
 
@@ -197,7 +230,19 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
 
     @Override
     public void onPlayerError(ExoPlaybackException error) {
-
+        Log.d(LOG_TAG, error.toString());
+        mRecipeImageView.setVisibility(View.VISIBLE);
+        mExoPlayerView.setVisibility(View.INVISIBLE);
+        String imageUrl = mSteps.get(mPosition).getThumbnailURL();
+        String videoUrl = mSteps.get(mPosition).getVideoURL();
+        if (TextUtils.isEmpty(videoUrl) && TextUtils.isEmpty(imageUrl)) {
+            mExoPlayerView.setDefaultArtwork(getResources().getDrawable(R.drawable.error_placeholder));
+        } else if (TextUtils.isEmpty(videoUrl) && !TextUtils.isEmpty(imageUrl)) {
+            Picasso.get().load(imageUrl).placeholder(R.drawable.progress_animation)
+                    .error(R.drawable.error_placeholder).into(mRecipeImageView);
+        } else {
+            mExoPlayerView.setDefaultArtwork(getResources().getDrawable(R.drawable.error_placeholder));
+        }
     }
 
     @Override
@@ -219,7 +264,6 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     @Override
     public void onStop() {
         super.onStop();
-        releaseExoplayer();
     }
 
     private ExoPlayer mExoPlayer;
@@ -235,10 +279,6 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
         LoadControl loadControl = new DefaultLoadControl();
         mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(), trackSelector, loadControl);
 
-
-        // Set the ExoPlayer.EventListener to this activity.
-        //mExoPlayerView.addListener(getActivity());
-
         prepareExoplayer();
         mExoPlayerView.setPlayer(mExoPlayer);
         mExoPlayer.seekTo(playbackPosition);
@@ -247,8 +287,9 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
     }
 
     private void releaseExoplayer() {
-        playbackPosition = mExoPlayer.getCurrentPosition();
+        mExoPlayer.stop();
         mExoPlayer.release();
+        mExoPlayer = null;
     }
 
 
@@ -256,6 +297,15 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
         // Prepare the MediaSource.
         String userAgent = Util.getUserAgent(getActivity(), "BakingApp");
         Uri progressiveUri = Uri.parse(mSteps.get(mPosition).getVideoURL());
+        // Create a data source factory.
+        DataSource.Factory dataSourceFactory =
+                new DefaultHttpDataSourceFactory(userAgent);
+        // Create a progressive media source pointing to a stream uri.
+        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(progressiveUri);
+
+        // Prepare the player with the progressive media source.
+        mExoPlayer.prepare(mediaSource);
 
         //For dash format
       /*  // Create a data source factory.
@@ -266,16 +316,20 @@ public class RecipeStepDetailFragment extends Fragment implements Player.EventLi
 */
 
 
-        // Create a data source factory.
-        DataSource.Factory dataSourceFactory =
-                new DefaultHttpDataSourceFactory(userAgent);
-// Create a progressive media source pointing to a stream uri.
-        MediaSource mediaSource = new ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(progressiveUri);
-
-// Prepare the player with the progressive media source.
-        mExoPlayer.prepare(mediaSource);
+    }
 
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        playbackPosition = mExoPlayer.getCurrentPosition();
+        outState.putLong(PLAY_BACK_POSITION, playbackPosition);
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releaseExoplayer();
     }
 }

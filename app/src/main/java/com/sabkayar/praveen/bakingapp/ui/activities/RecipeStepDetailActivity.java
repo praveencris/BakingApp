@@ -20,6 +20,8 @@ import com.sabkayar.praveen.bakingapp.ui.fragments.RecipeStepDetailFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.OnClick;
+
 public class RecipeStepDetailActivity extends AppCompatActivity implements RecipeStepDetailFragment.OnFragmentInteractionListener {
 
     private static final String STEP_EXTRA = "step_extra";
@@ -41,8 +43,15 @@ public class RecipeStepDetailActivity extends AppCompatActivity implements Recip
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_details);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_step_details);
-        mSteps = getIntent().getParcelableArrayListExtra(STEP_EXTRA);
-        mPosition = getIntent().getIntExtra(POSITION_EXTRA, 0);
+
+       if(savedInstanceState!=null){
+           mSteps = savedInstanceState.getParcelableArrayList(STEP_EXTRA);
+           mPosition = savedInstanceState.getInt(POSITION_EXTRA, 0);
+       }else {
+           mSteps = getIntent().getParcelableArrayListExtra(STEP_EXTRA);
+           mPosition = getIntent().getIntExtra(POSITION_EXTRA, 0);
+       }
+
 
         setTitleAndAddFragment();
         mBinding.imvLeftNavigation.setOnClickListener(new View.OnClickListener() {
@@ -105,5 +114,12 @@ public class RecipeStepDetailActivity extends AppCompatActivity implements Recip
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(STEP_EXTRA, (ArrayList<? extends Parcelable>) mSteps);
+        outState.putInt(POSITION_EXTRA,mPosition);
     }
 }

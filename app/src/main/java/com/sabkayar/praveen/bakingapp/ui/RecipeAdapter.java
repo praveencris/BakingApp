@@ -1,6 +1,7 @@
 package com.sabkayar.praveen.bakingapp.ui;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sabkayar.praveen.bakingapp.R;
 import com.sabkayar.praveen.bakingapp.databinding.RecipeMainItemLayoutBinding;
 import com.sabkayar.praveen.bakingapp.model.Recipe;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -65,6 +67,10 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
             mBinding.tvRecipeName.setText(recipe.getName());
             mBinding.tvIngredients.setText(mContext.getString(R.string.n_ingredients, recipe.getIngredients().size()));
             mBinding.tvServings.setText(mContext.getString(R.string.n_servings, recipe.getServings()));
+            if (!TextUtils.isEmpty(recipe.getImage()))
+                Picasso.get().load(recipe.getImage()).placeholder(R.drawable.progress_animation)
+                        .error(R.drawable.error_placeholder).into(mBinding.imvRecipe);
+
             mBinding.layoutRecipeMain.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

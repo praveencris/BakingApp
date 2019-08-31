@@ -12,4 +12,5 @@
     <string name="left_navigation">Left Navigation</string>
     <string name="right_navigation">Right Navigation</string>
     <string name="navigate_left_or_right">Navigate Left or Right</string>
+    <string name="image_of_recipe_if_image_is_video_is_not_available">Image of recipe if image is video is not available.</string>
 </resources>
