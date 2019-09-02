@@ -15,12 +15,13 @@ import com.sabkayar.praveen.bakingapp.model.Recipe;
 import com.sabkayar.praveen.bakingapp.model.Step;
 import com.sabkayar.praveen.bakingapp.ui.fragments.RecipeDetailFragment;
 import com.sabkayar.praveen.bakingapp.ui.fragments.RecipeStepDetailFragment;
+import com.sabkayar.praveen.bakingapp.utils.Utils;
 
 import java.util.List;
 import java.util.Objects;
 
 public class RecipeDetailActivity extends AppCompatActivity implements RecipeDetailFragment.OnFragmentInteractionListener, RecipeStepDetailFragment.OnFragmentInteractionListener {
-    private static final String RECIPE_EXTRA = "recipe_extra";
+    public static final String RECIPE_EXTRA = "recipe_extra";
     private ActivityFragmentContainerBinding mBinding;
     private boolean isTwoPane;
 
@@ -39,9 +40,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeDet
 
 
         Recipe recipe = getIntent().getParcelableExtra(RECIPE_EXTRA);
-        if (recipe != null)
+        if (recipe != null) {
             setTitle(recipe.getName());
+            Utils.saveLastSeenRecipeId(this, recipe.getId());
+        }
         if (savedInstanceState == null) {
+
             if (isTwoPane) {
                 //Attach fragment
                 RecipeDetailFragment recipeDetailFragment = RecipeDetailFragment.newInstance(recipe);

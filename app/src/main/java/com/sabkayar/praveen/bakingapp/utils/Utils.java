@@ -1,6 +1,7 @@
 package com.sabkayar.praveen.bakingapp.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.sabkayar.praveen.bakingapp.model.Ingredient;
 import com.sabkayar.praveen.bakingapp.model.Recipe;
@@ -74,7 +75,7 @@ public class Utils {
                 Recipe recipe = new Recipe();
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject json = jsonArray.getJSONObject(i);
-                    Ingredient ingredient =new Ingredient();
+                    Ingredient ingredient = new Ingredient();
                     ingredient.setQuantity(json.optInt(QUANTITY));
                     ingredient.setMeasure(json.optString(MEASURE));
                     ingredient.setIngredient(json.optString(INGREDIENT));
@@ -112,6 +113,48 @@ public class Utils {
             }
             return stepList;
         }
+
+
+        public static Recipe getRecipeBasedOnRecipeId(int recipeId, Context context) {
+            Recipe recipe = null;
+            try {
+                JSONArray jsonArray = new JSONArray(loadJSONFromAsset(context));
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+                    if (json.optInt(ID) == recipeId) {
+                        recipe = new Recipe();
+                        recipe.setId(json.optInt(ID));
+                        recipe.setName(json.optString(NAME));
+                        recipe.setIngredients(Utils.JSONUtils.getIngredients(json.getString(INGREDIENTS)));
+                        recipe.setSteps(Utils.JSONUtils.getSteps(json.getString(STEPS)));
+                        recipe.setServings(json.optInt(SERVINGS));
+                        recipe.setImage(json.optString(IMAGE));
+                        break;
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return recipe;
+        }
+
     }
+
+
+    private static final String SHARED_PREF_RECIPE = "shared_pref_recipe";
+    private static final String KEY_RECIPE_ID = "key_recipe_id";
+
+    public static void saveLastSeenRecipeId(Context context, int value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREF_RECIPE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(KEY_RECIPE_ID, value);
+        editor.apply();
+    }
+
+    public static int getLastSeenRecipeId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREF_RECIPE, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(KEY_RECIPE_ID, 1);
+    }
+
 
 }
